@@ -1,4 +1,4 @@
-package bookstore_users
+package bookstore_users_db
 
 import (
 	"database/sql"
@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	ClientDB *sql.DB
+	Client *sql.DB
 
 	username = os.Getenv(mysqlBookstoreUsersUsername)
 	password = os.Getenv(mysqlBookstoreUsersPassword)
@@ -31,11 +31,11 @@ func init() {
 		username, password, host, port, database)
 
 	var err error
-	ClientDB, err = sql.Open("mysql", dataSourceName)
+	Client, err = sql.Open("mysql", dataSourceName)
 	if err != nil {
 		panic(err)
 	}
-	if err = ClientDB.Ping(); err != nil {
+	if err = Client.Ping(); err != nil {
 		panic(err)
 	}
 	fmt.Println("database successfully configured")

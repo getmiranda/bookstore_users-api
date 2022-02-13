@@ -8,8 +8,9 @@ import (
 func urls() {
 	r.GET("/ping", ping.Ping)
 
-	r.GET("/users/:user_id", users.GetUser)
-	r.POST("/users", users.CreateUser)
-	r.PUT("/users/:user_id", users.UpdateUser)
-	r.PATCH("/users/:user_id", users.UpdateUser)
+	r.GET("/users/:user_id", users.Get)
+	r.POST("/users", users.Create)
+	r.PUT("/users/:user_id", users.Update)
+	r.PATCH("/users/:user_id", users.Update)
+	r.DELETE("/users/:user_id", users.Delete)
 }

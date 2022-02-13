@@ -49,3 +49,11 @@ func UpdateUser(isPartial bool, user *users.User) (*users.User, errors.APIError)
 	}
 	return current, nil
 }
+
+func DeleteUser(userId uint64) errors.APIError {
+	user := &users.User{ID: userId}
+	if err := user.Delete(); err != nil {
+		return err
+	}
+	return nil
+}
