@@ -41,3 +41,11 @@ func NewNotFoundError(message string) APIError {
 		Err:        "not_found",
 	}
 }
+
+func NewInternalServerError(message string) APIError {
+	return &apiError{
+		ErrMessage: message,
+		ErrStatus:  http.StatusInternalServerError,
+		Err:        "internal_server_error",
+	}
+}

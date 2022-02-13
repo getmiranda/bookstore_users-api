@@ -10,4 +10,6 @@ func urls() {
 
 	r.GET("/users/:user_id", users.GetUser)
 	r.POST("/users", users.CreateUser)
+	r.PUT("/users/:user_id", users.UpdateUser)
+	r.PATCH("/users/:user_id", users.UpdateUser)
 }
