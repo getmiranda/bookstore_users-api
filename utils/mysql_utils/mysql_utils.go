@@ -15,13 +15,13 @@ func ParseError(err error) errors.APIError {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
 		if strings.Contains(err.Error(), errorNoRows) {
-			return errors.NewNotFoundError("no record found")
+			return errors.NewNotFoundError("no record found", err.Error())
 		}
-		return errors.NewInternalServerError("error parsing database response")
+		return errors.NewInternalServerError("error parsing database response", err.Error())
 	}
 	switch sqlErr.Number {
 	case 1062:
-		return errors.NewBadRequestError("invalid data")
+		return errors.NewBadRequestError("invalid data", sqlErr.Message)
 	}
-	return errors.NewInternalServerError("error processing request")
+	return errors.NewInternalServerError("error processing request", sqlErr.Message)
 }

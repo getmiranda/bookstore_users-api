@@ -12,6 +12,7 @@ type apiError struct {
 	ErrMessage string `json:"message"`
 	ErrStatus  int    `json:"status_code"`
 	Err        string `json:"error"`
+	Causes     string `json:"causes,omitempty"`
 }
 
 func (e *apiError) Message() string {
@@ -26,26 +27,29 @@ func (e *apiError) Error() string {
 	return e.Err
 }
 
-func NewBadRequestError(message string) APIError {
+func NewBadRequestError(message, causes string) APIError {
 	return &apiError{
 		ErrMessage: message,
 		ErrStatus:  http.StatusBadRequest,
 		Err:        "bad_request",
+		Causes:     causes,
 	}
 }
 
-func NewNotFoundError(message string) APIError {
+func NewNotFoundError(message, causes string) APIError {
 	return &apiError{
 		ErrMessage: message,
 		ErrStatus:  http.StatusNotFound,
 		Err:        "not_found",
+		Causes:     causes,
 	}
 }
 
-func NewInternalServerError(message string) APIError {
+func NewInternalServerError(message, causes string) APIError {
 	return &apiError{
 		ErrMessage: message,
 		ErrStatus:  http.StatusInternalServerError,
 		Err:        "internal_server_error",
+		Causes:     causes,
 	}
 }

@@ -15,7 +15,7 @@ func GetUser(userId uint64) (*users.User, errors.APIError) {
 
 func CreateUser(user *users.User) (*users.User, errors.APIError) {
 	if err := user.Validate(); err != nil {
-		return nil, errors.NewBadRequestError(err.Error())
+		return nil, errors.NewBadRequestError("invalid parameters", err.Error())
 	}
 	if err := user.Save(); err != nil {
 		return nil, err
@@ -52,8 +52,10 @@ func UpdateUser(isPartial bool, user *users.User) (*users.User, errors.APIError)
 
 func DeleteUser(userId uint64) errors.APIError {
 	user := &users.User{ID: userId}
-	if err := user.Delete(); err != nil {
-		return err
-	}
-	return nil
+	return user.Delete()
+}
+
+func Search(status string) ([]users.User, errors.APIError) {
+	dao := &users.User{}
+	return dao.FindByStatus(status)
 }

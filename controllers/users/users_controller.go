@@ -13,7 +13,7 @@ import (
 func getUserId(userIdParam string) (uint64, errors.APIError) {
 	userId, err := strconv.ParseUint(userIdParam, 10, 64)
 	if err != nil {
-		return 0, errors.NewBadRequestError("user id should be a valid number")
+		return 0, errors.NewBadRequestError("user id should be a valid number", err.Error())
 	}
 	return userId, nil
 }
@@ -36,7 +36,7 @@ func Get(c *gin.Context) {
 func Create(c *gin.Context) {
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		apiErr := errors.NewBadRequestError("invalid json body")
+		apiErr := errors.NewBadRequestError("invalid json body", err.Error())
 		c.JSON(apiErr.Status(), apiErr)
 		return
 	}
@@ -58,7 +58,7 @@ func Update(c *gin.Context) {
 
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		apiErr := errors.NewBadRequestError("invalid json body")
+		apiErr := errors.NewBadRequestError("invalid json body", err.Error())
 		c.JSON(apiErr.Status(), apiErr)
 		return
 	}
@@ -86,4 +86,15 @@ func Delete(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
+}
+
+func Search(c *gin.Context) {
+	status := c.Query("status")
+
+	users, err := services.Search(status)
+	if err != nil {
+		c.JSON(err.Status(), err)
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }
