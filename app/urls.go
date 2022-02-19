@@ -13,5 +13,5 @@ func urls() {
 	r.PUT("/users/:user_id", users.Update)
 	r.PATCH("/users/:user_id", users.Update)
 	r.DELETE("/users/:user_id", users.Delete)
-	r.GET("/internel/users/search", users.Search)
+	r.GET("/internal/users/search", users.Search)
 }

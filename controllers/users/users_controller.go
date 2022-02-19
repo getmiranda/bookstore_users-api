@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/getmiranda/bookstore_users-api/domain/users"
-	"github.com/getmiranda/bookstore_users-api/services"
+	"github.com/getmiranda/bookstore_users-api/services/users_service"
 	"github.com/getmiranda/bookstore_users-api/utils/errors"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +13,7 @@ import (
 func getUserId(userIdParam string) (uint64, errors.APIError) {
 	userId, err := strconv.ParseUint(userIdParam, 10, 64)
 	if err != nil {
-		return 0, errors.NewBadRequestError("user id should be a valid number", err.Error())
+		return 0, errors.NewBadRequestError("user id should be a valid number")
 	}
 	return userId, nil
 }
@@ -25,28 +25,28 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	user, getErr := services.GetUser(userId)
+	user, getErr := users_service.Users.GetUser(userId)
 	if getErr != nil {
 		c.JSON(getErr.Status(), getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, user.Marshal(c.GetHeader("X-Public") == "true"))
 }
 
 func Create(c *gin.Context) {
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		apiErr := errors.NewBadRequestError("invalid json body", err.Error())
+		apiErr := errors.NewBadRequestError("invalid json body")
 		c.JSON(apiErr.Status(), apiErr)
 		return
 	}
 
-	result, err := services.CreateUser(&user)
+	result, err := users_service.Users.CreateUser(&user)
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
-	c.JSON(http.StatusCreated, result)
+	c.JSON(http.StatusCreated, result.Marshal(c.GetHeader("X-Public") == "true"))
 }
 
 func Update(c *gin.Context) {
@@ -58,7 +58,7 @@ func Update(c *gin.Context) {
 
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		apiErr := errors.NewBadRequestError("invalid json body", err.Error())
+		apiErr := errors.NewBadRequestError("invalid json body")
 		c.JSON(apiErr.Status(), apiErr)
 		return
 	}
@@ -66,12 +66,12 @@ func Update(c *gin.Context) {
 	user.ID = userId
 	isPartial := c.Request.Method == http.MethodPatch
 
-	result, err := services.UpdateUser(isPartial, &user)
+	result, err := users_service.Users.UpdateUser(isPartial, &user)
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, result.Marshal(c.GetHeader("X-Public") == "true"))
 }
 
 func Delete(c *gin.Context) {
@@ -81,7 +81,7 @@ func Delete(c *gin.Context) {
 		return
 	}
 
-	if err := services.DeleteUser(userId); err != nil {
+	if err := users_service.Users.DeleteUser(userId); err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
@@ -91,10 +91,11 @@ func Delete(c *gin.Context) {
 func Search(c *gin.Context) {
 	status := c.Query("status")
 
-	users, err := services.Search(status)
+	users, err := users_service.Users.Search(status)
 	if err != nil {
 		c.JSON(err.Status(), err)
 		return
 	}
-	c.JSON(http.StatusOK, users)
+
+	c.JSON(http.StatusOK, users.Marshal(c.GetHeader("X-Public") == "true"))
 }

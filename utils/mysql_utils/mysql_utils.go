@@ -3,6 +3,7 @@ package mysql_utils
 import (
 	"strings"
 
+	"github.com/getmiranda/bookstore_users-api/logger"
 	"github.com/getmiranda/bookstore_users-api/utils/errors"
 	"github.com/go-sql-driver/mysql"
 )
@@ -14,14 +15,20 @@ const (
 func ParseError(err error) errors.APIError {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
+		// No MySQL errors
 		if strings.Contains(err.Error(), errorNoRows) {
-			return errors.NewNotFoundError("no record found", err.Error())
+			logger.WarnWithError("record not found", err)
+			return errors.NewNotFoundError("record not found")
 		}
-		return errors.NewInternalServerError("error parsing database response", err.Error())
+		logger.ErrorWithError("unknown error", err)
+		return errors.NewInternalServerError("database error")
 	}
+	// MySQL errors
 	switch sqlErr.Number {
 	case 1062:
-		return errors.NewBadRequestError("invalid data", sqlErr.Message)
+		logger.ErrorWithError("duplicate record", err)
+		return errors.NewBadRequestError("duplicate record")
 	}
-	return errors.NewInternalServerError("error processing request", sqlErr.Message)
+	logger.ErrorWithError("unknown error", err)
+	return errors.NewInternalServerError("database error")
 }
