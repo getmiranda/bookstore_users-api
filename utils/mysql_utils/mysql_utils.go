@@ -17,7 +17,7 @@ func ParseError(err error) errors.APIError {
 	if !ok {
 		// No MySQL errors
 		if strings.Contains(err.Error(), errorNoRows) {
-			logger.WarnWithError("record not found", err)
+			logger.ErrorWithError("record not found", err)
 			return errors.NewNotFoundError("record not found")
 		}
 		logger.ErrorWithError("unknown error", err)
