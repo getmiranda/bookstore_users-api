@@ -7,19 +7,9 @@ import (
 	"github.com/getmiranda/bookstore_users-api/utils/errors"
 )
 
-var Users usersServiceInterface = &usersService{}
+type UsersService struct{}
 
-type usersService struct{}
-
-type usersServiceInterface interface {
-	GetUser(uint64) (*users.User, errors.APIError)
-	CreateUser(*users.User) (*users.User, errors.APIError)
-	UpdateUser(bool, *users.User) (*users.User, errors.APIError)
-	DeleteUser(uint64) errors.APIError
-	Search(string) (users.Users, errors.APIError)
-}
-
-func (u *usersService) GetUser(userId uint64) (*users.User, errors.APIError) {
+func (u *UsersService) GetUser(userId uint64) (*users.User, error) {
 	result := &users.User{ID: userId}
 	if err := result.Get(); err != nil {
 		return nil, err
@@ -27,7 +17,7 @@ func (u *usersService) GetUser(userId uint64) (*users.User, errors.APIError) {
 	return result, nil
 }
 
-func (u *usersService) CreateUser(user *users.User) (*users.User, errors.APIError) {
+func (u *UsersService) CreateUser(user *users.User) (*users.User, error) {
 	if err := user.Validate(); err != nil {
 		return nil, errors.NewBadRequestError("invalid parameters")
 	}
@@ -41,8 +31,8 @@ func (u *usersService) CreateUser(user *users.User) (*users.User, errors.APIErro
 	return user, nil
 }
 
-func (u *usersService) UpdateUser(isPartial bool, user *users.User) (*users.User, errors.APIError) {
-	current, err := Users.GetUser(user.ID)
+func (u *UsersService) UpdateUser(isPartial bool, user *users.User) (*users.User, error) {
+	current, err := u.GetUser(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -68,12 +58,23 @@ func (u *usersService) UpdateUser(isPartial bool, user *users.User) (*users.User
 	return current, nil
 }
 
-func (u *usersService) DeleteUser(userId uint64) errors.APIError {
+func (u *UsersService) DeleteUser(userId uint64) error {
 	user := &users.User{ID: userId}
 	return user.Delete()
 }
 
-func (u *usersService) Search(status string) (users.Users, errors.APIError) {
+func (u *UsersService) Search(status string) (users.Users, error) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
+}
+
+func (u *UsersService) LoginUser(request *users.LoginRequest) (*users.User, error) {
+	dao := &users.User{
+		Email:    request.Email,
+		Password: crypto_utils.GetMd5(request.Password),
+	}
+	if err := dao.FindByEmailAndPassword(); err != nil {
+		return nil, err
+	}
+	return dao, nil
 }

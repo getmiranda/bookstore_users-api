@@ -9,14 +9,14 @@ import (
 )
 
 const (
-	errorNoRows = "no rows in result set"
+	ErrorNoRows = "no rows in result set"
 )
 
 func ParseError(err error) errors.APIError {
 	sqlErr, ok := err.(*mysql.MySQLError)
 	if !ok {
 		// No MySQL errors
-		if strings.Contains(err.Error(), errorNoRows) {
+		if strings.Contains(err.Error(), ErrorNoRows) {
 			logger.ErrorWithError("record not found", err)
 			return errors.NewNotFoundError("record not found")
 		}
